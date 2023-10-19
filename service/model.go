@@ -2,7 +2,7 @@ package service
 
 import "time"
 
-type Info struct {
+type FileInfo struct {
 	Streams []struct {
 		Index              int    `json:"index"`
 		CodecName          string `json:"codec_name"`

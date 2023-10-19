@@ -1,0 +1,127 @@
+package service
+
+import (
+	"fmt"
+	"github.com/commander-cli/cmd"
+	"path/filepath"
+	"strconv"
+	"strings"
+)
+
+type Convert struct {
+	InputFile  string
+	OutputFile string
+}
+
+type ConvertProcess interface {
+	Process()
+}
+
+// ConvertVideo 视频文件格式转换
+// mp4 -> avi
+// mp4 -> mpeg
+type ConvertVideo struct {
+	Convert
+	// Lossless 无损转换
+	Lossless bool
+
+	Segment bool
+	// SegmentTime mp4 -> m3u8 ts每个切片的时长（秒）
+	SegmentTime int
+}
+
+func (obj *ConvertVideo) Process() {
+	var str []string
+	str = append(str, mName)
+	str = append(str, "-i")
+	str = append(str, obj.InputFile)
+	if obj.Lossless {
+		str = append(str, "-q:v 0")
+	}
+	if obj.Segment {
+		str = append(str, "-codec copy -vbsf h264_mp4toannexb -map 0 -f segment -segment_list")
+	}
+	str = append(str, obj.OutputFile)
+	if obj.Segment {
+		if obj.SegmentTime > 0 {
+			str = append(str, "-segment_time")
+			str = append(str, strconv.Itoa(obj.SegmentTime))
+		} else {
+			str = append(str, "-segment_time 10")
+		}
+		str = append(str, filepath.Dir(obj.OutputFile)+string(filepath.Separator)+"%03d.ts")
+	}
+
+	command := strings.Join(str, " ")
+	c := cmd.NewCommand(command, cmd.WithStandardStreams)
+	fmt.Println(command)
+	err := c.Execute()
+	if err != nil {
+		panic(err)
+	}
+}
+
+// ConvertVideoMp3 提取视频中的音频
+type ConvertVideoMp3 struct {
+	Convert
+}
+
+func (obj *ConvertVideoMp3) Process() {
+	var str []string
+	str = append(str, mName)
+	str = append(str, "-i")
+	str = append(str, obj.InputFile)
+	str = append(str, "-vn -ar 44100 -ac 2 -ab 320k -f mp3")
+	str = append(str, obj.OutputFile)
+
+	command := strings.Join(str, " ")
+	c := cmd.NewCommand(command, cmd.WithStandardStreams)
+	err := c.Execute()
+	if err != nil {
+		panic(err)
+	}
+}
+
+// ConvertVideoScale 视频缩放
+type ConvertVideoScale struct {
+	Convert
+	Height int
+	Width  int
+}
+
+func (obj *ConvertVideoScale) Process() {
+	var str []string
+	str = append(str, mName)
+	str = append(str, "-i")
+	str = append(str, obj.InputFile)
+	str = append(str, "-filter:v scale="+strconv.Itoa(obj.Width)+":"+strconv.Itoa(obj.Height)+" -c:a copy")
+	str = append(str, obj.OutputFile)
+
+	command := strings.Join(str, " ")
+	c := cmd.NewCommand(command, cmd.WithStandardStreams)
+	err := c.Execute()
+	if err != nil {
+		panic(err)
+	}
+}
+
+// ConvertVideoImage 视频帧转图片
+type ConvertVideoImage struct {
+	Convert
+}
+
+func (obj *ConvertVideoImage) Process() {
+	var str []string
+	str = append(str, mName)
+	str = append(str, "-i")
+	str = append(str, obj.InputFile)
+	str = append(str, "-r 1 -f image2")
+	str = append(str, filepath.Dir(obj.InputFile)+string(filepath.Separator)+"image-%5d.png")
+
+	command := strings.Join(str, " ")
+	c := cmd.NewCommand(command, cmd.WithStandardStreams)
+	err := c.Execute()
+	if err != nil {
+		panic(err)
+	}
+}

@@ -1,11 +1,12 @@
 package cmd
 
 import (
-	"VideoTranscode/service"
+	. "VideoTranscode/service"
 	"errors"
 	"fmt"
 	"github.com/spf13/cobra"
 	"strconv"
+	"time"
 )
 
 var InfoCmd = &cobra.Command{
@@ -19,8 +20,8 @@ var InfoCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		obj := service.Transcode{}
-		info, err := obj.Info(args[0])
+		obj := Info{}
+		info, err := obj.GetInfo(args[0])
 		if err != nil {
 			fmt.Printf("Error : %s\n", err.Error())
 			return
@@ -29,11 +30,11 @@ var InfoCmd = &cobra.Command{
 
 		duration := info.Format.Duration
 		f, _ := strconv.ParseFloat(duration, 64)
-		fmt.Printf("Duration: %s\n", fmt.Sprintf("%.2f", f))
+		fmt.Printf("Duration: %s\n", formatTime(int64(f)))
 
 		size := info.Format.Size
 		i, _ := strconv.ParseInt(size, 10, 64)
-		fmt.Printf("FileSize: %s\n", byteCountString(i))
+		fmt.Printf("FileSize: %s\n", formatFileSize(i))
 
 		for i, stream := range info.Streams {
 			idx := i + 1
@@ -51,16 +52,27 @@ var InfoCmd = &cobra.Command{
 	},
 }
 
-func byteCountString(b int64) string {
-	const unit = 1024
-	if b < unit {
-		return fmt.Sprintf("%d B", b)
+func formatFileSize(fileSize int64) string {
+	if fileSize < 1024 {
+		return fmt.Sprintf("%.2f B", float64(fileSize)/float64(1))
+	} else if fileSize < (1024 * 1024) {
+		return fmt.Sprintf("%.2f KiB", float64(fileSize)/float64(1024))
+	} else if fileSize < (1024 * 1024 * 1024) {
+		return fmt.Sprintf("%.2f MiB", float64(fileSize)/float64(1024*1024))
+	} else if fileSize < (1024 * 1024 * 1024 * 1024) {
+		return fmt.Sprintf("%.2f GiB", float64(fileSize)/float64(1024*1024*1024))
+	} else if fileSize < (1024 * 1024 * 1024 * 1024 * 1024) {
+		return fmt.Sprintf("%.2f TiB", float64(fileSize)/float64(1024*1024*1024*1024))
+	} else { //if fileSize < (1024 * 1024 * 1024 * 1024 * 1024 * 1024)
+		return fmt.Sprintf("%.2f PiB", float64(fileSize)/float64(1024*1024*1024*1024*1024))
 	}
-	div, exp := int64(unit), 0
-	for n := b / unit; n >= unit; n /= unit {
-		div *= unit
-		exp++
-	}
-	return fmt.Sprintf("%.1f %cB",
-		float64(b)/float64(div), "KMGTPE"[exp])
+}
+
+func formatTime(sec int64) string {
+	duration := time.Duration(sec) * time.Second
+	hours := int(duration.Hours())
+	minutes := int(duration.Minutes()) % 60
+	seconds := int(duration.Seconds()) % 60
+
+	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
 }

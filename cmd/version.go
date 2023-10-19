@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"VideoTranscode/service"
+	. "VideoTranscode/service"
 	"fmt"
 	"github.com/spf13/cobra"
 )
@@ -14,8 +14,8 @@ var VersionCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		obj := service.Transcode{}
-		output := obj.Version()
+		obj := Version{}
+		output := obj.GetVersion()
 		fmt.Println(output)
 	},
 }
