@@ -110,3 +110,23 @@ var ConvertImageCmd = &cobra.Command{
 		obj.Process()
 	},
 }
+
+var ConvertCropCmd = &cobra.Command{
+	Use:   "crop",
+	Short: "Crop video.",
+	Long:  "Crop video.",
+	Args: func(cmd *cobra.Command, args []string) error {
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		obj := ConvertVideoCrop{
+			Convert: Convert{
+				InputFile:  args[0],
+				OutputFile: args[1],
+			},
+			StartTime: args[2],
+			EndTime:   args[3],
+		}
+		obj.Process()
+	},
+}
