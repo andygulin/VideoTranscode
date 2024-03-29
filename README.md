@@ -50,3 +50,15 @@ go build
 # mp4 视频剪切
 ./VideoTranscode convert crop 1234.mp4 00:00:00 00:01:00
 ```
+
+```shell
+# 生成ts文件列表input.txt
+# input.txt
+file '001.ts'
+file '002.ts'
+file '003.ts'
+...
+./VideoTranscode convert generate_ts_list /dir/ts input.txt
+# ts -> mp4合并
+./VideoTranscode convert merge input.txt 1234.mp4
+```

@@ -3,7 +3,9 @@ package service
 import (
 	"fmt"
 	"github.com/commander-cli/cmd"
+	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -143,6 +145,60 @@ func (obj *ConvertVideoCrop) Process() {
 	str = append(str, "-to "+obj.EndTime)
 	str = append(str, obj.OutputFile)
 
+	command := strings.Join(str, " ")
+	c := cmd.NewCommand(command, cmd.WithStandardStreams)
+	err := c.Execute()
+	if err != nil {
+		panic(err)
+	}
+}
+
+// ConvertVideoGenerateTsList 生成TS列表文件
+type ConvertVideoGenerateTsList struct {
+	Convert
+}
+
+func (obj *ConvertVideoGenerateTsList) Process() {
+	input := obj.InputFile
+	files, err := os.ReadDir(input)
+	if err != nil {
+		panic(err)
+	}
+
+	var tsFiles []string
+	for _, file := range files {
+		if strings.HasSuffix(file.Name(), ".ts") {
+			tsFiles = append(tsFiles, input+"/"+file.Name())
+		}
+	}
+	sort.Strings(tsFiles)
+
+	output, err := os.Create(obj.OutputFile)
+	defer func(output *os.File) {
+		_ = output.Close()
+	}(output)
+	for _, fileName := range tsFiles {
+		_, err := output.WriteString("file '" + fileName + "'\n")
+		if err != nil {
+			panic(err)
+		}
+	}
+	fmt.Println("The " + obj.OutputFile + " file is successfully written.")
+}
+
+// ConvertVideoMerge ts合并mp4
+type ConvertVideoMerge struct {
+	Convert
+}
+
+func (obj *ConvertVideoMerge) Process() {
+	var str []string
+	str = append(str, mName)
+	str = append(str, "-f concat -safe 0")
+	str = append(str, "-i")
+	str = append(str, obj.InputFile)
+	str = append(str, "-c copy")
+	str = append(str, obj.OutputFile)
 	command := strings.Join(str, " ")
 	c := cmd.NewCommand(command, cmd.WithStandardStreams)
 	err := c.Execute()

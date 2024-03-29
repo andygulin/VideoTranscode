@@ -18,7 +18,14 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	rootCmd.AddCommand(VersionCmd, InfoCmd)
 
-	ConvertCmd.AddCommand(ConvertVideoCmd, ConvertMp3Cmd, ConvertScaleCmd, ConvertImageCmd, ConvertCropCmd)
+	ConvertCmd.AddCommand(
+		ConvertVideoCmd,
+		ConvertMp3Cmd,
+		ConvertScaleCmd,
+		ConvertImageCmd,
+		ConvertCropCmd,
+		ConvertMergeCmd,
+		ConvertGenerateTsListCmd)
 	rootCmd.AddCommand(ConvertCmd)
 
 	if err := rootCmd.Execute(); err != nil {

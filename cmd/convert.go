@@ -130,3 +130,39 @@ var ConvertCropCmd = &cobra.Command{
 		obj.Process()
 	},
 }
+
+var ConvertGenerateTsListCmd = &cobra.Command{
+	Use:   "generate_ts_list",
+	Short: "The ts file list is generated.",
+	Long:  "The ts file list is generated.",
+	Args: func(cmd *cobra.Command, args []string) error {
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		obj := ConvertVideoGenerateTsList{
+			Convert: Convert{
+				InputFile:  args[0],
+				OutputFile: args[1],
+			},
+		}
+		obj.Process()
+	},
+}
+
+var ConvertMergeCmd = &cobra.Command{
+	Use:   "merge",
+	Short: "Merge video.",
+	Long:  "Merge video.",
+	Args: func(cmd *cobra.Command, args []string) error {
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		obj := ConvertVideoMerge{
+			Convert: Convert{
+				InputFile:  args[0],
+				OutputFile: args[1],
+			},
+		}
+		obj.Process()
+	},
+}
