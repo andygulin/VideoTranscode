@@ -9,7 +9,7 @@ import (
 type Info struct{}
 
 func (obj *Info) GetInfo(file string) (FileInfo, error) {
-	command := fmt.Sprintf("%s -v quiet -show_format -show_streams -print_format json %s", pName, file)
+	command := fmt.Sprintf("%s -v quiet -show_format -show_streams -print_format json %s", GetPName(), file)
 	c := cmd.NewCommand(command)
 	err := c.Execute()
 	if err != nil {

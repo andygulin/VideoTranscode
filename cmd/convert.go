@@ -2,6 +2,7 @@ package cmd
 
 import (
 	. "VideoTranscode/service"
+	. "VideoTranscode/service/process"
 	"github.com/spf13/cobra"
 	"path/filepath"
 	"strconv"

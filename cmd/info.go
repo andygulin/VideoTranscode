@@ -30,10 +30,33 @@ var InfoCmd = &cobra.Command{
 
 		duration := info.Format.Duration
 		f, _ := strconv.ParseFloat(duration, 64)
+		formatTime := func(sec int64) string {
+			duration := time.Duration(sec) * time.Second
+			hours := int(duration.Hours())
+			minutes := int(duration.Minutes()) % 60
+			seconds := int(duration.Seconds()) % 60
+
+			return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
+		}
 		fmt.Printf("Duration: %s\n", formatTime(int64(f)))
 
 		size := info.Format.Size
 		i, _ := strconv.ParseInt(size, 10, 64)
+		formatFileSize := func(fileSize int64) string {
+			if fileSize < 1024 {
+				return fmt.Sprintf("%.2f B", float64(fileSize)/float64(1))
+			} else if fileSize < (1024 * 1024) {
+				return fmt.Sprintf("%.2f KiB", float64(fileSize)/float64(1024))
+			} else if fileSize < (1024 * 1024 * 1024) {
+				return fmt.Sprintf("%.2f MiB", float64(fileSize)/float64(1024*1024))
+			} else if fileSize < (1024 * 1024 * 1024 * 1024) {
+				return fmt.Sprintf("%.2f GiB", float64(fileSize)/float64(1024*1024*1024))
+			} else if fileSize < (1024 * 1024 * 1024 * 1024 * 1024) {
+				return fmt.Sprintf("%.2f TiB", float64(fileSize)/float64(1024*1024*1024*1024))
+			} else { //if fileSize < (1024 * 1024 * 1024 * 1024 * 1024 * 1024)
+				return fmt.Sprintf("%.2f PiB", float64(fileSize)/float64(1024*1024*1024*1024*1024))
+			}
+		}
 		fmt.Printf("FileSize: %s\n", formatFileSize(i))
 
 		for i, stream := range info.Streams {
@@ -50,29 +73,4 @@ var InfoCmd = &cobra.Command{
 			}
 		}
 	},
-}
-
-func formatFileSize(fileSize int64) string {
-	if fileSize < 1024 {
-		return fmt.Sprintf("%.2f B", float64(fileSize)/float64(1))
-	} else if fileSize < (1024 * 1024) {
-		return fmt.Sprintf("%.2f KiB", float64(fileSize)/float64(1024))
-	} else if fileSize < (1024 * 1024 * 1024) {
-		return fmt.Sprintf("%.2f MiB", float64(fileSize)/float64(1024*1024))
-	} else if fileSize < (1024 * 1024 * 1024 * 1024) {
-		return fmt.Sprintf("%.2f GiB", float64(fileSize)/float64(1024*1024*1024))
-	} else if fileSize < (1024 * 1024 * 1024 * 1024 * 1024) {
-		return fmt.Sprintf("%.2f TiB", float64(fileSize)/float64(1024*1024*1024*1024))
-	} else { //if fileSize < (1024 * 1024 * 1024 * 1024 * 1024 * 1024)
-		return fmt.Sprintf("%.2f PiB", float64(fileSize)/float64(1024*1024*1024*1024*1024))
-	}
-}
-
-func formatTime(sec int64) string {
-	duration := time.Duration(sec) * time.Second
-	hours := int(duration.Hours())
-	minutes := int(duration.Minutes()) % 60
-	seconds := int(duration.Seconds()) % 60
-
-	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds)
 }
