@@ -3,7 +3,16 @@
 #### Build
 
 ```shell
+# 本地编译
 go build
+
+# 跨平台编译
+./build.sh
+
+# MacOS
+./VideoTranscode_darwin_amd64
+# Windows
+./VideoTranscode_windows_amd64.exe
 ```
 
 #### FFMPEG版本
