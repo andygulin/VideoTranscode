@@ -47,7 +47,7 @@ go build
 
 ```shell
 # mp4 -> mp4缩放
-./VideoTranscode convert scale 1234.mp4 1234_1280.mp3 1280 720
+./VideoTranscode convert scale 1234.mp4 1234_1280.mp4 1280 720
 ```
 
 ```shell
