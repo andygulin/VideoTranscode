@@ -3,8 +3,6 @@
 #### Build
 
 ```shell
-# 本地编译
-go build
 
 # 跨平台编译
 ./build.sh

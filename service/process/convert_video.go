@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+const DefaultSegmentTime = 10
+
 // ConvertVideo 视频文件格式转换
 // mp4 -> avi
 // mp4 -> mpeg
@@ -17,8 +19,9 @@ type ConvertVideo struct {
 	// Lossless 无损转换
 	Lossless bool
 
+	// Segment 是否转m3u8
 	Segment bool
-	// SegmentTime mp4 -> m3u8 ts每个切片的时长（秒）
+	// SegmentTime m3u8 ts每个切片的时长（秒）
 	SegmentTime int
 }
 
@@ -39,7 +42,7 @@ func (obj *ConvertVideo) Process() {
 			str = append(str, "-segment_time")
 			str = append(str, strconv.Itoa(obj.SegmentTime))
 		} else {
-			str = append(str, "-segment_time 10")
+			str = append(str, fmt.Sprintf("-segment_time %d", DefaultSegmentTime))
 		}
 		str = append(str, filepath.Dir(obj.OutputFile)+string(filepath.Separator)+"%03d.ts")
 	}
