@@ -1,16 +1,32 @@
 ### FFMPEG Go封装
 
+### Install FFMPEG
+
+```shell
+# MacOS
+brew install ffmpeg
+# Centos
+yum install ffmpeg
+# Ubuntu
+apt install ffmpeg
+# Windows
+https://ffmpeg.org/download.html
+下载 & 配置环境变量
+```
+
 #### Build
 
 ```shell
 
-# 跨平台编译
+# 编译
 ./build.sh
 
 # MacOS
 ./VideoTranscode_darwin_amd64
 # Windows
 ./VideoTranscode_windows_amd64.exe
+# Linux
+./VideoTranscode_linux_amd64
 ```
 
 #### FFMPEG版本
