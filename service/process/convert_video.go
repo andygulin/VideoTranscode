@@ -2,11 +2,11 @@ package process
 
 import (
 	. "VideoTranscode/service"
+	"bytes"
 	"fmt"
-	"github.com/commander-cli/cmd"
+	"os/exec"
 	"path/filepath"
 	"strconv"
-	"strings"
 )
 
 const DefaultSegmentTime = 10
@@ -26,31 +26,42 @@ type ConvertVideo struct {
 }
 
 func (obj *ConvertVideo) Process() {
-	var str []string
-	str = append(str, GetMName())
-	str = append(str, "-i")
-	str = append(str, obj.InputFile)
+	arg := []string{"-i"}
+	arg = append(arg, obj.InputFile)
 	if obj.Lossless {
-		str = append(str, "-q:v 0")
+		arg = append(arg, "-q:v")
+		arg = append(arg, "0")
 	}
 	if obj.Segment {
-		str = append(str, "-codec copy -vbsf h264_mp4toannexb -map 0 -f segment -segment_list")
+		arg = append(arg, "-codec")
+		arg = append(arg, "copy")
+		arg = append(arg, "-bsf:v")
+		arg = append(arg, "h264_mp4toannexb")
+		arg = append(arg, "-map")
+		arg = append(arg, "0")
+		arg = append(arg, "-f")
+		arg = append(arg, "segment")
+		arg = append(arg, "-segment_list")
 	}
-	str = append(str, obj.OutputFile)
+	arg = append(arg, obj.OutputFile)
 	if obj.Segment {
 		if obj.SegmentTime > 0 {
-			str = append(str, "-segment_time")
-			str = append(str, strconv.Itoa(obj.SegmentTime))
+			arg = append(arg, "-segment_time")
+			arg = append(arg, strconv.Itoa(obj.SegmentTime))
 		} else {
-			str = append(str, fmt.Sprintf("-segment_time %d", DefaultSegmentTime))
+			arg = append(arg, "-segment_time")
+			arg = append(arg, strconv.Itoa(DefaultSegmentTime))
 		}
-		str = append(str, filepath.Dir(obj.OutputFile)+string(filepath.Separator)+"%03d.ts")
+		arg = append(arg, filepath.Dir(obj.OutputFile)+string(filepath.Separator)+"%03d.ts")
 	}
+	cmd := exec.Command(GetMName(), arg...)
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
 
-	command := strings.Join(str, " ")
-	c := cmd.NewCommand(command, cmd.WithStandardStreams)
-	fmt.Println(command)
-	err := c.Execute()
+	fmt.Println(cmd.String())
+	err := cmd.Run()
 	if err != nil {
 		panic(err)
 	}

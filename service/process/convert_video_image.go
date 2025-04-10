@@ -2,9 +2,10 @@ package process
 
 import (
 	. "VideoTranscode/service"
-	"github.com/commander-cli/cmd"
+	"bytes"
+	"fmt"
+	"os/exec"
 	"path/filepath"
-	"strings"
 )
 
 // ConvertVideoImage 视频帧转图片
@@ -13,16 +14,21 @@ type ConvertVideoImage struct {
 }
 
 func (obj *ConvertVideoImage) Process() {
-	var str []string
-	str = append(str, GetMName())
-	str = append(str, "-i")
-	str = append(str, obj.InputFile)
-	str = append(str, "-r 1 -f image2")
-	str = append(str, filepath.Dir(obj.InputFile)+string(filepath.Separator)+"image-%5d.png")
+	arg := []string{"-i"}
+	arg = append(arg, obj.InputFile)
+	arg = append(arg, "-r")
+	arg = append(arg, "1")
+	arg = append(arg, "-f")
+	arg = append(arg, "image2")
+	arg = append(arg, filepath.Dir(obj.InputFile)+string(filepath.Separator)+"image-%5d.png")
+	cmd := exec.Command(GetMName(), arg...)
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
 
-	command := strings.Join(str, " ")
-	c := cmd.NewCommand(command, cmd.WithStandardStreams)
-	err := c.Execute()
+	fmt.Println(cmd.String())
+	err := cmd.Run()
 	if err != nil {
 		panic(err)
 	}

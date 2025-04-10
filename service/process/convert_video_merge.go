@@ -2,8 +2,9 @@ package process
 
 import (
 	. "VideoTranscode/service"
-	"github.com/commander-cli/cmd"
-	"strings"
+	"bytes"
+	"fmt"
+	"os/exec"
 )
 
 // ConvertVideoMerge ts合并mp4
@@ -12,16 +13,19 @@ type ConvertVideoMerge struct {
 }
 
 func (obj *ConvertVideoMerge) Process() {
-	var str []string
-	str = append(str, GetMName())
-	str = append(str, "-f concat -safe 0")
-	str = append(str, "-i")
-	str = append(str, obj.InputFile)
-	str = append(str, "-c copy")
-	str = append(str, obj.OutputFile)
-	command := strings.Join(str, " ")
-	c := cmd.NewCommand(command, cmd.WithStandardStreams)
-	err := c.Execute()
+	arg := []string{"-f", "concat", "-safe", "0", "-i"}
+	arg = append(arg, obj.InputFile)
+	arg = append(arg, "-c")
+	arg = append(arg, "copy")
+	arg = append(arg, obj.OutputFile)
+	cmd := exec.Command(GetMName(), arg...)
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+
+	fmt.Println(cmd.String())
+	err := cmd.Run()
 	if err != nil {
 		panic(err)
 	}

@@ -2,9 +2,9 @@ package process
 
 import (
 	. "VideoTranscode/service"
-	"github.com/commander-cli/cmd"
-	"strconv"
-	"strings"
+	"bytes"
+	"fmt"
+	"os/exec"
 )
 
 // ConvertVideoScale 视频缩放
@@ -15,16 +15,20 @@ type ConvertVideoScale struct {
 }
 
 func (obj *ConvertVideoScale) Process() {
-	var str []string
-	str = append(str, GetMName())
-	str = append(str, "-i")
-	str = append(str, obj.InputFile)
-	str = append(str, "-filter:v scale="+strconv.Itoa(obj.Width)+":"+strconv.Itoa(obj.Height)+" -c:a copy")
-	str = append(str, obj.OutputFile)
+	arg := []string{"-i", obj.InputFile}
+	arg = append(arg, "-filter:v")
+	arg = append(arg, fmt.Sprintf("scale=%d:%d", obj.Width, obj.Height))
+	arg = append(arg, "-c:a")
+	arg = append(arg, "copy")
+	arg = append(arg, obj.OutputFile)
+	cmd := exec.Command(GetMName(), arg...)
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
 
-	command := strings.Join(str, " ")
-	c := cmd.NewCommand(command, cmd.WithStandardStreams)
-	err := c.Execute()
+	fmt.Println(cmd.String())
+	err := cmd.Run()
 	if err != nil {
 		panic(err)
 	}

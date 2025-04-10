@@ -1,18 +1,24 @@
 package service
 
 import (
+	"bytes"
 	"fmt"
-	"github.com/commander-cli/cmd"
+	"os/exec"
 )
 
 type Version struct{}
 
 func (obj *Version) GetVersion() string {
-	command := fmt.Sprintf("%s -version", mName)
-	c := cmd.NewCommand(command)
-	err := c.Execute()
+	cmd := exec.Command(GetMName(), "-version")
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
 	if err != nil {
 		return fmt.Sprintf("Error : %s\n", err.Error())
 	}
-	return c.Stdout()
+
+	return out.String()
 }

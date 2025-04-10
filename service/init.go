@@ -2,8 +2,7 @@ package service
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
+	"os/exec"
 	"runtime"
 )
 
@@ -11,39 +10,23 @@ var mName string
 var pName string
 
 func init() {
-	pwd, _ := os.Getwd()
+	mName = "ffmpeg"
+	pName = "ffprobe"
+
 	osName := runtime.GOOS
-	mCmd := "ffmpeg"
 	if osName == "windows" {
-		mCmd = mCmd + ".exe"
+		mName = mName + ".exe"
+		pName = pName + ".exe"
 	}
 
-	pCmd := "ffprobe"
-	if osName == "windows" {
-		pCmd = pCmd + ".exe"
-	}
+	checkCommandAvailable(mName)
+	checkCommandAvailable(pName)
+}
 
-	pathExists := func(path string) (bool, error) {
-		_, err := os.Stat(path)
-		if err == nil {
-			return true, nil
-		}
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-		return false, err
-	}
-
-	mName, _ = filepath.Abs(filepath.Join(pwd, "ffmpeg", osName, mCmd))
-	exist, err := pathExists(mName)
-	if !exist || err != nil {
-		fmt.Printf("File Not Found : %s\n", mName)
-	}
-
-	pName, _ = filepath.Abs(filepath.Join(pwd, "ffmpeg", osName, pCmd))
-	exist, err = pathExists(pName)
-	if !exist || err != nil {
-		fmt.Printf("File Not Found : %s\n", pName)
+func checkCommandAvailable(command string) {
+	_, err := exec.LookPath(command)
+	if err != nil {
+		panic(fmt.Sprintf("%s is not installed", command))
 	}
 }
 

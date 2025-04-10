@@ -8,7 +8,7 @@ if [ ! -f "$GO_PROGRAM" ]; then
     exit 1
 fi
 
-PLATFORMS=("darwin amd64 " "windows amd64 .exe")
+PLATFORMS=("darwin amd64 " "windows amd64 .exe" "linux amd64 ")
 
 for platform in "${PLATFORMS[@]}"; do
     IFS=' ' read -r -a parts <<< "$platform"

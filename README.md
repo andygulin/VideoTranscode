@@ -55,7 +55,7 @@
 
 ```shell
 # mp4 视频剪切
-./VideoTranscode convert crop 1234.mp4 00:00:00 00:01:00
+./VideoTranscode convert crop 1234.mp4 1234_crop.mp4 00:00:00 00:01:00
 ```
 
 ```shell
