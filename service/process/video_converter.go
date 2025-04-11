@@ -2,20 +2,19 @@ package process
 
 import (
 	. "VideoTranscode/service"
-	"bytes"
-	"fmt"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 )
 
 const DefaultSegmentTime = 10
 
-// ConvertVideo 视频文件格式转换
+// VideoConverter 视频文件格式转换
 // mp4 -> avi
 // mp4 -> mpeg
-type ConvertVideo struct {
-	Convert
+type VideoConverter struct {
+	ConversionConfig
+	VideoCommandExecutor
+
 	// Lossless 无损转换
 	Lossless bool
 
@@ -25,7 +24,7 @@ type ConvertVideo struct {
 	SegmentTime int
 }
 
-func (obj *ConvertVideo) Process() {
+func (obj *VideoConverter) Convert() {
 	arg := []string{"-i"}
 	arg = append(arg, obj.InputFile)
 	if obj.Lossless {
@@ -54,14 +53,8 @@ func (obj *ConvertVideo) Process() {
 		}
 		arg = append(arg, filepath.Dir(obj.OutputFile)+string(filepath.Separator)+"%03d.ts")
 	}
-	cmd := exec.Command(GetMName(), arg...)
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
 
-	fmt.Println(cmd.String())
-	err := cmd.Run()
+	err := obj.ExecuteCommand(GetMName(), arg...)
 	if err != nil {
 		panic(err)
 	}

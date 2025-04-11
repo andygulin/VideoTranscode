@@ -8,12 +8,12 @@ import (
 	"strings"
 )
 
-// ConvertVideoGenerateTsList 生成TS列表文件
-type ConvertVideoGenerateTsList struct {
-	Convert
+// VideoTsListGenerator 生成TS列表文件
+type VideoTsListGenerator struct {
+	ConversionConfig
 }
 
-func (obj *ConvertVideoGenerateTsList) Process() {
+func (obj *VideoTsListGenerator) Convert() {
 	input := obj.InputFile
 	files, err := os.ReadDir(input)
 	if err != nil {

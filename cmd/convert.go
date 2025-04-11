@@ -28,14 +28,14 @@ var ConvertVideoCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		obj := ConvertVideo{
-			Convert: Convert{
+		obj := VideoConverter{
+			ConversionConfig: ConversionConfig{
 				InputFile:  args[0],
 				OutputFile: args[1],
 			},
 		}
 		if len(args) == 2 {
-			obj.Process()
+			obj.Convert()
 		}
 		if len(args) == 3 {
 			outputFile := obj.OutputFile
@@ -49,7 +49,7 @@ var ConvertVideoCmd = &cobra.Command{
 				lossless, _ := strconv.ParseBool(args[2])
 				obj.Lossless = lossless
 			}
-			obj.Process()
+			obj.Convert()
 		}
 	},
 }
@@ -62,13 +62,13 @@ var ConvertMp3Cmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		obj := ConvertVideoMp3{
-			Convert: Convert{
+		obj := VideoAudioExtractor{
+			ConversionConfig: ConversionConfig{
 				InputFile:  args[0],
 				OutputFile: args[1],
 			},
 		}
-		obj.Process()
+		obj.Convert()
 	},
 }
 
@@ -82,15 +82,15 @@ var ConvertScaleCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		width, _ := strconv.Atoi(args[2])
 		height, _ := strconv.Atoi(args[3])
-		obj := ConvertVideoScale{
-			Convert: Convert{
+		obj := VideoScale{
+			ConversionConfig: ConversionConfig{
 				InputFile:  args[0],
 				OutputFile: args[1],
 			},
 			Width:  width,
 			Height: height,
 		}
-		obj.Process()
+		obj.Convert()
 	},
 }
 
@@ -102,13 +102,13 @@ var ConvertImageCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		obj := ConvertVideoImage{
-			Convert: Convert{
+		obj := VideoFrameExtractor{
+			ConversionConfig: ConversionConfig{
 				InputFile:  args[0],
 				OutputFile: "",
 			},
 		}
-		obj.Process()
+		obj.Convert()
 	},
 }
 
@@ -120,15 +120,15 @@ var ConvertCropCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		obj := ConvertVideoCrop{
-			Convert: Convert{
+		obj := VideoCrop{
+			ConversionConfig: ConversionConfig{
 				InputFile:  args[0],
 				OutputFile: args[1],
 			},
 			StartTime: args[2],
 			EndTime:   args[3],
 		}
-		obj.Process()
+		obj.Convert()
 	},
 }
 
@@ -140,13 +140,13 @@ var ConvertGenerateTsListCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		obj := ConvertVideoGenerateTsList{
-			Convert: Convert{
+		obj := VideoTsListGenerator{
+			ConversionConfig: ConversionConfig{
 				InputFile:  args[0],
 				OutputFile: args[1],
 			},
 		}
-		obj.Process()
+		obj.Convert()
 	},
 }
 
@@ -158,12 +158,12 @@ var ConvertMergeCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		obj := ConvertVideoMerge{
-			Convert: Convert{
+		obj := VideoMerge{
+			ConversionConfig: ConversionConfig{
 				InputFile:  args[0],
 				OutputFile: args[1],
 			},
 		}
-		obj.Process()
+		obj.Convert()
 	},
 }

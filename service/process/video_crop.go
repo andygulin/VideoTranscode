@@ -2,19 +2,18 @@ package process
 
 import (
 	. "VideoTranscode/service"
-	"bytes"
-	"fmt"
-	"os/exec"
 )
 
-// ConvertVideoCrop 视频剪切
-type ConvertVideoCrop struct {
-	Convert
+// VideoCrop 视频剪切
+type VideoCrop struct {
+	ConversionConfig
+	VideoCommandExecutor
+
 	StartTime string
 	EndTime   string
 }
 
-func (obj *ConvertVideoCrop) Process() {
+func (obj *VideoCrop) Convert() {
 	arg := []string{"-i"}
 	arg = append(arg, obj.InputFile)
 	arg = append(arg, "-ss")
@@ -24,14 +23,8 @@ func (obj *ConvertVideoCrop) Process() {
 	arg = append(arg, "-to")
 	arg = append(arg, obj.EndTime)
 	arg = append(arg, obj.OutputFile)
-	cmd := exec.Command(GetMName(), arg...)
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
 
-	fmt.Println(cmd.String())
-	err := cmd.Run()
+	err := obj.ExecuteCommand(GetMName(), arg...)
 	if err != nil {
 		panic(err)
 	}
