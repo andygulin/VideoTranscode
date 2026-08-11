@@ -6,34 +6,35 @@ import (
 	"runtime"
 )
 
-var mName string
-var pName string
+var (
+	ffmpegBin  string
+	ffprobeBin string
+)
 
 func init() {
-	mName = "ffmpeg"
-	pName = "ffprobe"
+	ffmpegBin = "ffmpeg"
+	ffprobeBin = "ffprobe"
 
-	osName := runtime.GOOS
-	if osName == "windows" {
-		mName = mName + ".exe"
-		pName = pName + ".exe"
+	if runtime.GOOS == "windows" {
+		ffmpegBin += ".exe"
+		ffprobeBin += ".exe"
 	}
-
-	checkCommandAvailable(mName)
-	checkCommandAvailable(pName)
 }
 
-func checkCommandAvailable(command string) {
-	_, err := exec.LookPath(command)
-	if err != nil {
-		panic(fmt.Sprintf("%s is not installed", command))
+func CheckFFTools() error {
+	if _, err := exec.LookPath(ffmpegBin); err != nil {
+		return fmt.Errorf("dependency missing: %s not found in PATH", ffmpegBin)
 	}
+	if _, err := exec.LookPath(ffprobeBin); err != nil {
+		return fmt.Errorf("dependency missing: %s not found in PATH", ffprobeBin)
+	}
+	return nil
 }
 
 func GetMName() string {
-	return mName
+	return ffmpegBin
 }
 
 func GetPName() string {
-	return pName
+	return ffprobeBin
 }

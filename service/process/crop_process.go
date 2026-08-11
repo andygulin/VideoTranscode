@@ -1,19 +1,20 @@
 package process
 
 import (
-	. "VideoTranscode/service"
+	"VideoTranscode/service"
+	"fmt"
 )
 
 // VideoCrop 视频剪切
 type VideoCrop struct {
-	ConversionConfig
-	VideoCommandExecutor
+	service.ConversionConfig
+	service.VideoCommandExecutor
 
 	StartTime string
 	EndTime   string
 }
 
-func (obj *VideoCrop) Convert() {
+func (obj *VideoCrop) Convert() error {
 	arg := []string{"-i"}
 	arg = append(arg, obj.InputFile)
 	arg = append(arg, "-ss")
@@ -24,8 +25,9 @@ func (obj *VideoCrop) Convert() {
 	arg = append(arg, obj.EndTime)
 	arg = append(arg, obj.OutputFile)
 
-	err := obj.ExecuteCommand(GetMName(), arg...)
+	err := obj.ExecuteCommand(service.GetMName(), arg...)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to crop video: %w", err)
 	}
+	return nil
 }

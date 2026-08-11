@@ -1,17 +1,18 @@
 package process
 
 import (
-	. "VideoTranscode/service"
+	"VideoTranscode/service"
+	"fmt"
 	"path/filepath"
 )
 
-// VideoFrameExtractor 视频帧转图片
-type VideoFrameExtractor struct {
-	ConversionConfig
-	VideoCommandExecutor
+// Snapshot 视频帧转图片
+type Snapshot struct {
+	service.ConversionConfig
+	service.VideoCommandExecutor
 }
 
-func (obj *VideoFrameExtractor) Convert() {
+func (obj *Snapshot) Convert() error {
 	arg := []string{"-i"}
 	arg = append(arg, obj.InputFile)
 	arg = append(arg, "-r")
@@ -20,8 +21,9 @@ func (obj *VideoFrameExtractor) Convert() {
 	arg = append(arg, "image2")
 	arg = append(arg, filepath.Dir(obj.InputFile)+string(filepath.Separator)+"image-%5d.png")
 
-	err := obj.ExecuteCommand(GetMName(), arg...)
+	err := obj.ExecuteCommand(service.GetMName(), arg...)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to take snapshot: %w", err)
 	}
+	return nil
 }

@@ -1,16 +1,17 @@
 package process
 
 import (
-	. "VideoTranscode/service"
+	"VideoTranscode/service"
+	"fmt"
 )
 
-// VideoAudioExtractor 提取视频中的音频
-type VideoAudioExtractor struct {
-	ConversionConfig
-	VideoCommandExecutor
+// ExtractAudio 提取视频中的音频
+type ExtractAudio struct {
+	service.ConversionConfig
+	service.VideoCommandExecutor
 }
 
-func (obj *VideoAudioExtractor) Convert() {
+func (obj *ExtractAudio) Convert() error {
 	arg := []string{"-i", obj.InputFile}
 	arg = append(arg, "-vn")
 	arg = append(arg, "-ar")
@@ -23,8 +24,9 @@ func (obj *VideoAudioExtractor) Convert() {
 	arg = append(arg, "mp3")
 	arg = append(arg, obj.OutputFile)
 
-	err := obj.ExecuteCommand(GetMName(), arg...)
+	err := obj.ExecuteCommand(service.GetMName(), arg...)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to execute audio extraction command: %w", err)
 	}
+	return nil
 }

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	. "VideoTranscode/service"
+	"VideoTranscode/service"
 	"errors"
 	"fmt"
 	"strconv"
@@ -11,101 +11,116 @@ import (
 )
 
 var InfoCmd = &cobra.Command{
-	Use:   "info",
-	Short: "Output video/audio file information.",
-	Long:  "Output video/audio file information.",
+	Use:   "info <file> [file...]",
+	Short: "Display metadata and stream information for video/audio files",
+	Long: `Display detailed metadata, container and stream information for video or audio files.
+It parses format metadata, video track parameters, audio track parameters, duration, bitrate, file size and other properties.
+
+Examples:
+  VideoTranscode info demo.mp4
+  VideoTranscode info video.mp4 audio.aac
+`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
-			return errors.New("Missing video/audio files\n.")
+			return errors.New("missing video/audio file argument")
 		}
 		return nil
 	},
-	Run: func(cmd *cobra.Command, args []string) {
-		obj := Info{}
-		info, err := obj.GetInfo(args[0])
-		if err != nil {
-			fmt.Printf("Error : %s\n", err.Error())
-			return
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := service.CheckFFTools(); err != nil {
+			return err
 		}
-
+		obj := service.Info{}
 		const splitLine = "========================================================"
-		fmt.Println(splitLine)
-		fmt.Println("                     FILE INFORMATION")
-		fmt.Println(splitLine)
 
-		durationSec, _ := strconv.ParseFloat(info.Format.Duration, 64)
-		sizeByte, _ := strconv.ParseInt(info.Format.Size, 10, 64)
-		totalBitrate, _ := strconv.Atoi(info.Format.BitRate)
-
-		fmt.Printf("File Path     : %s\n", info.Format.Filename)
-		fmt.Printf("Container     : %s | %s\n", info.Format.FormatName, info.Format.FormatLongName)
-		fmt.Printf("Duration      : %s (%.2f seconds)\n", formatDuration(int64(durationSec)), durationSec)
-		fmt.Printf("File Size     : %s (%s bytes)\n", formatFileSize(sizeByte), info.Format.Size)
-		fmt.Printf("Total Bitrate : %s\n", formatBitRate(totalBitrate))
-
-		fmt.Println("\n" + splitLine)
-		fmt.Println("                   STREAM DETAILS")
-		fmt.Println(splitLine)
-
-		for idx, stream := range info.Streams {
-			streamNo := idx + 1
-			var trackType string
-			switch stream.CodecType {
-			case "video":
-				trackType = "[VIDEO]"
-			case "audio":
-				trackType = "[AUDIO]"
-			default:
-				trackType = fmt.Sprintf("[%s]", stream.CodecType)
+		for _, filePath := range args {
+			info, err := obj.GetInfo(filePath)
+			if err != nil {
+				fmt.Printf("\n[ERROR] get info for %s failed: %v\n", filePath, err)
+				continue
 			}
 
-			fmt.Printf("\n▶ Stream #%d %s\n", streamNo, trackType)
-			fmt.Println("--------------------------------------------------------")
+			fmt.Println("\n" + splitLine)
+			fmt.Println("                     FILE INFORMATION")
+			fmt.Println(splitLine)
 
-			fmt.Printf("%-16s: %d\n", "Index", stream.Index)
-			fmt.Printf("%-16s: %s\n", "Codec", stream.CodecName)
-			fmt.Printf("%-16s: %s\n", "Codec Description", stream.CodecLongName)
-			fmt.Printf("%-16s: %s\n", "Profile", stream.Profile)
+			durationSec, _ := strconv.ParseFloat(info.Format.Duration, 64)
+			sizeByte, _ := strconv.ParseInt(info.Format.Size, 10, 64)
+			totalBitrate, _ := strconv.Atoi(info.Format.BitRate)
 
-			if stream.BitRate != "" {
-				br, _ := strconv.Atoi(stream.BitRate)
-				fmt.Printf("%-16s: %s\n", "Bitrate", formatBitRate(br))
-			}
+			fmt.Printf("File Path     : %s\n", info.Format.Filename)
+			fmt.Printf("Container     : %s | %s\n", info.Format.FormatName, info.Format.FormatLongName)
+			fmt.Printf("Duration      : %s (%.2f seconds)\n", formatDuration(int64(durationSec)), durationSec)
+			fmt.Printf("File Size     : %s (%s bytes)\n", formatFileSize(sizeByte), info.Format.Size)
+			fmt.Printf("Total Bitrate : %s\n", formatBitRate(totalBitrate))
 
-			if stream.NbFrames != "" {
-				fmt.Printf("%-16s: %s frames\n", "Frames", stream.NbFrames)
-			}
+			fmt.Println("\n" + splitLine)
+			fmt.Println("                   STREAM DETAILS")
+			fmt.Println(splitLine)
 
-			if stream.CodecType == "video" {
-				fmt.Printf("%-16s: %d × %d\n", "Resolution", stream.Width, stream.Height)
-				fmt.Printf("%-16s: %s\n", "Display Aspect", stream.DisplayAspectRatio)
-				fmt.Printf("%-16s: %s\n", "Pixel Format", stream.PixFmt)
-				fmt.Printf("%-16s: %s\n", "Real FPS", stream.RFrameRate)
-				fmt.Printf("%-16s: %s\n", "Avg FPS", stream.AvgFrameRate)
-				if stream.Level > 0 {
-					fmt.Printf("%-16s: %d\n", "Level", stream.Level)
+			for idx, stream := range info.Streams {
+				streamNo := idx + 1
+				var trackType string
+				switch stream.CodecType {
+				case "video":
+					trackType = "[VIDEO]"
+				case "audio":
+					trackType = "[AUDIO]"
+				default:
+					trackType = fmt.Sprintf("[%s]", stream.CodecType)
 				}
-				if stream.Refs > 0 {
-					fmt.Printf("%-16s: %d\n", "Ref Frames", stream.Refs)
-				}
-			}
 
-			if stream.CodecType == "audio" {
-				fmt.Printf("%-16s: %s Hz\n", "Sample Rate", stream.SampleRate)
-				fmt.Printf("%-16s: %d\n", "Channels", stream.Channels)
-				fmt.Printf("%-16s: %s\n", "Channel Layout", stream.ChannelLayout)
-				fmt.Printf("%-16s: %s\n", "Sample Format", stream.SampleFmt)
-				if stream.BitsPerSample > 0 {
-					fmt.Printf("%-16s: %d bit\n", "Bit Depth", stream.BitsPerSample)
-				}
-			}
+				fmt.Printf("\n▶ Stream #%d %s\n", streamNo, trackType)
+				fmt.Println("--------------------------------------------------------")
 
-			if stream.Tags.Language != "" {
-				fmt.Printf("%-16s: %s\n", "Language", stream.Tags.Language)
+				fmt.Printf("%-16s: %d\n", "Index", stream.Index)
+				fmt.Printf("%-16s: %s\n", "Codec", stream.CodecName)
+				fmt.Printf("%-16s: %s\n", "Codec Description", stream.CodecLongName)
+				if stream.Profile != "" {
+					fmt.Printf("%-16s: %s\n", "Profile", stream.Profile)
+				}
+
+				if stream.BitRate != "" {
+					br, _ := strconv.Atoi(stream.BitRate)
+					fmt.Printf("%-16s: %s\n", "Bitrate", formatBitRate(br))
+				}
+
+				if stream.NbFrames != "" {
+					fmt.Printf("%-16s: %s frames\n", "Frames", stream.NbFrames)
+				}
+
+				if stream.CodecType == "video" {
+					fmt.Printf("%-16s: %d × %d\n", "Resolution", stream.Width, stream.Height)
+					fmt.Printf("%-16s: %s\n", "Display Aspect", stream.DisplayAspectRatio)
+					fmt.Printf("%-16s: %s\n", "Pixel Format", stream.PixFmt)
+					fmt.Printf("%-16s: %s\n", "Real FPS", stream.RFrameRate)
+					fmt.Printf("%-16s: %s\n", "Avg FPS", stream.AvgFrameRate)
+					if stream.Level > 0 {
+						fmt.Printf("%-16s: %d\n", "Level", stream.Level)
+					}
+					if stream.Refs > 0 {
+						fmt.Printf("%-16s: %d\n", "Ref Frames", stream.Refs)
+					}
+				}
+
+				if stream.CodecType == "audio" {
+					fmt.Printf("%-16s: %s Hz\n", "Sample Rate", stream.SampleRate)
+					fmt.Printf("%-16s: %d\n", "Channels", stream.Channels)
+					fmt.Printf("%-16s: %s\n", "Channel Layout", stream.ChannelLayout)
+					fmt.Printf("%-16s: %s\n", "Sample Format", stream.SampleFmt)
+					if stream.BitsPerSample > 0 {
+						fmt.Printf("%-16s: %d bit\n", "Bit Depth", stream.BitsPerSample)
+					}
+				}
+
+				if stream.Tags.Language != "" {
+					fmt.Printf("%-16s: %s\n", "Language", stream.Tags.Language)
+				}
 			}
 		}
 
 		fmt.Println("\n" + splitLine)
+		return nil
 	},
 }
 

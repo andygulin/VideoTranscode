@@ -27,4 +27,11 @@ for platform in "${PLATFORMS[@]}"; do
     fi
 done
 
+echo "Compiling for local machine -> ${GO_OUTPUT}"
+go build -o "${GO_OUTPUT}" "$GO_PROGRAM"
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to compile local binary."
+    exit 1
+fi
+
 echo "Compilation completed successfully."

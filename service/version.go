@@ -8,7 +8,7 @@ import (
 
 type Version struct{}
 
-func (obj *Version) GetVersion() string {
+func (obj *Version) GetVersion() (string, error) {
 	cmd := exec.Command(GetMName(), "-version")
 	var out bytes.Buffer
 	var stderr bytes.Buffer
@@ -17,8 +17,8 @@ func (obj *Version) GetVersion() string {
 
 	err := cmd.Run()
 	if err != nil {
-		return fmt.Sprintf("Error : %s\n", err.Error())
+		return "", fmt.Errorf("Error : %s\n", err.Error())
 	}
 
-	return out.String()
+	return out.String(), nil
 }
